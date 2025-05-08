@@ -1,24 +1,18 @@
-import java.util.Scanner;
+import java.util.*;
 
 public class CLIStyle {
-    // Cross-platform terminal clear method
-    public static void clearScreen() throws Exception {
-            final String os = System.getProperty("os.name");
-
-            if (os.contains("Windows")) {
-                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-            } else {
-                System.out.print("\033[H\033[2J");
-                System.out.flush();
-            }  
+    
+    private static void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
     }
     
-    // Decorative Header
+    // Decoration
     public static void printHeader(String title) {
         int width = 50;
         String border = "=".repeat(width);
         System.out.println(border);
-        System.out.printf("%" + ((width + title.length()) / 2) + "s%n", title);
+        System.out.printf("%" + ((width + title.length()) / 2) + "s%n", title); // Padding. In technical terms, it ensures the string occupies a certain number of characters.
         System.out.println(border);
     }
     
@@ -31,52 +25,52 @@ public class CLIStyle {
     }
 
     // Generic menu interface
-    public static int showMenu(String title, String[] options) throws Exception {
-        clearScreen();
-        printHeader(title);
-        
-        for (int i = 0; i < options.length; i++) {
-            System.out.printf("%d. %s%n", i + 1, options[i]);
-        }
-        System.out.print("\nSelect an option: ");
-        
-        try (Scanner scanner = new Scanner(System.in)) {
-            int choice = scanner.nextInt();
+    public static int showMenu(String title, String[] options, Scanner scanner) { 
+        int choice = -1; 
+
+        while (true) { 
+            clearScreen();
+            printHeader(title);
             
-            // Validate choice
-            if (choice < 1 || choice > options.length) {
-                printError("Invalid option. Please try again.");
-                return showMenu(title, options);
+            // Display menu options
+            for (int i = 0; i < options.length; i++) {
+                System.out.printf("%d. %s%n", i + 1, options[i]);
             }
-            
-            return choice;
+            System.out.print("\nSelect an option: ");
+
+            try {
+                choice = scanner.nextInt(); 
+                scanner.nextLine(); // Consume the newline left-over
+                
+                if (choice >= 1 && choice <= options.length) {
+                    break; // Valid choice, exit the loop
+                } else {
+                    // Choice is a number but outside the allowed range
+                    printError("Invalid option number. Please choose between 1 and " + options.length + ".");
+                    // Pause briefly to let user see the error
+                    try { Thread.sleep(1500); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+                }
+            } catch (InputMismatchException e) { // Choice is not an integer
+                printError("Invalid input. Please enter a number.");
+                scanner.nextLine(); // Consume the invalid input
+                // Pause briefly to let user see the error
+                try { Thread.sleep(1500); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+            } 
         }
+        return choice;
     }
 
-    // Login/Register menu
-    public static int showLoginMenu() throws Exception {
-        String[] loginOptions = {
-            "Login",
-            "Register",
-            "Exit"
-        };
-        
-        return showMenu("Welcome to 1BG3 Arcade", loginOptions);
-    }
-
-    // Main game menu after login
-    public static int showMainMenu(Account account) throws Exception {
+ // Main game menu after login
+ public static int showMainMenu(Account account, Scanner scanner) { 
         clearScreen();
-        printHeader("Welcome, " + account.getUsername());
+        printHeader("Welcome, " + account.getUsername()); 
         
         String[] mainOptions = {
             "Play Games",
-            "Top Up",
-            "View Balance",
-            "Game History",
+            "Top Up / Exchange",
             "Logout"
         };
-        
-        return showMenu("Main Menu", mainOptions);
-    }
+        return showMenu("Main Menu", mainOptions, scanner); 
+    } 
 }
+

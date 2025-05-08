@@ -15,17 +15,17 @@ public class Account {
         this.tickets = 0;
     }
 
-    // Getting the current game object
     public void setGame(Game game) {
         this.currentGame = game;
     }
-
     public Game getCurrentGame() {
         return currentGame;
     }
-    // Account Details
     public String getUsername() {
         return username;
+    }
+    public String getPassword() {
+        return password;
     }
     public boolean checkPassword(String password) {
         return this.password.equals(password);
@@ -37,6 +37,10 @@ public class Account {
     }
     public void addBalance(double amount) {
         this.balance += amount;
+    }
+    public void addBalance(int amount) {
+        // Call the double version after casting
+        addBalance((double) amount);
     }
 
     // Tokens
